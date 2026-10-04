@@ -1,0 +1,18 @@
+/* ==========================================================================
+   ck-hasher — Narrow screen
+   Every rule in this file applies at 720px and below. The stylesheet link in
+   index.html carries the condition, and that link comes after css/style.css.
+   Load this file last, so these rules win the cascade.
+   ========================================================================== */
+
+/* The GitHub mark stays on a phone. The link holds a square touch target. */
+.topbar__link {
+  justify-content: center;
+  min-block-size: 44px;
+  min-inline-size: 44px;
+}
+
+/* The footer stacks its three parts on a narrow screen. */
+.footer__inner {
+  justify-content: flex-start;
+}

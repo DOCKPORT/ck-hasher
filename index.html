@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
+    <meta name="color-scheme" content="dark" />
+    <meta name="theme-color" content="#0b0b0d" />
+    <title>ck-hasher</title>
+    <meta
+      name="description"
+      content="A dashboard that finds a Bitcoin miner by address and shows its status, stats, and block odds."
+    />
+
+    <!-- The tab icon. The header loads the same SVG mark. -->
+    <link rel="icon" type="image/svg+xml" href="css/ck-hasher-logo.svg" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Chivo:wght@400;500;700&family=Geist+Mono:wght@400;500&display=swap"
+    />
+
+    <!-- The version token marks a stylesheet change. A browser then fetches the
+         new file in place of the cached one. Bump the token after a style edit. -->
+    <link rel="stylesheet" href="css/theme.css?v=1" />
+    <link rel="stylesheet" href="css/base.css?v=1" />
+    <!-- The dot field. This module draws the page background array. -->
+    <link rel="stylesheet" href="css/dots.css?v=1" />
+    <link rel="stylesheet" href="css/style.css?v=1" />
+    <!-- The narrow screen rules. This link stays last, so those rules win. -->
+    <link
+      rel="stylesheet"
+      href="css/mobile.css?v=1"
+      media="(max-width: 720px)"
+    />
+  </head>
+
+  <body>
+    <header class="topbar">
+      <div class="container topbar__inner">
+        <div class="brand">
+          <a class="brand__logo-link" href="./" aria-label="ck-hasher">
+            <img
+              class="brand__logo"
+              src="css/ck-hasher-logo.svg"
+              alt=""
+              width="28"
+              height="28"
+            />
+          </a>
+          <span class="brand__name">ck-hasher <span>Dashboard</span></span>
+        </div>
+        <div class="topbar__meta">
+          <a
+            class="topbar__link"
+            href="https://github.com/DOCKPORT/ck-hasher"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="GitHub repository"
+          >
+            <img
+              class="topbar__icon"
+              src="css/GitHub_Invertocat_White_Clearspace.svg"
+              alt=""
+              width="28"
+              height="28"
+            />
+          </a>
+        </div>
+      </div>
+    </header>
+
+    <!-- The address search sits below the top bar. The views arrive in a later
+         step, so the page holds the search alone for now. -->
+    <main class="container main" id="app">
+      <section class="section search-section" aria-labelledby="search-title">
+        <h2 id="search-title" class="section-head">Find your miner</h2>
+        <form class="search" id="address-form" novalidate>
+          <label class="search__label eyebrow" for="address-input">
+            Bitcoin address
+          </label>
+          <div class="search__row">
+            <input
+              class="search__input"
+              id="address-input"
+              name="address"
+              type="text"
+              inputmode="text"
+              autocomplete="off"
+              autocapitalize="off"
+              spellcheck="false"
+              placeholder="Enter a Bitcoin address"
+              aria-describedby="address-status"
+            />
+            <button class="btn btn--icon" type="submit" aria-label="Find miner">
+              <svg
+                class="btn__icon"
+                viewBox="0 0 24 24"
+                width="18"
+                height="18"
+                aria-hidden="true"
+                focusable="false"
+              >
+                <circle cx="11" cy="11" r="7" />
+                <line x1="16.5" y1="16.5" x2="21" y2="21" />
+              </svg>
+            </button>
+          </div>
+          <p
+            class="search__status"
+            id="address-status"
+            role="status"
+            aria-live="polite"
+          ></p>
+        </form>
+      </section>
+
+      <!-- The two stats placeholders sit side by side under the search bar. The
+           left panel is the narrow one. The views that fill them arrive in a
+           later step, so they stay empty below the titles. -->
+      <section class="section panel-section" aria-label="Miner stats">
+        <div class="panel-grid">
+          <div class="panel" id="panel-status">
+            <h3 class="panel__title">Miner Data</h3>
+            <dl class="field-list">
+              <div class="field-list__row">
+                <dt class="field-list__label">Hash rate :</dt>
+                <dd class="field-list__value">&mdash;</dd>
+              </div>
+              <div class="field-list__row">
+                <dt class="field-list__label">Workers :</dt>
+                <dd class="field-list__value">&mdash;</dd>
+              </div>
+              <div class="field-list__row">
+                <dt class="field-list__label">Total shares :</dt>
+                <dd class="field-list__value">&mdash;</dd>
+              </div>
+              <div class="field-list__row">
+                <dt class="field-list__label">Last share :</dt>
+                <dd class="field-list__value">&mdash;</dd>
+              </div>
+              <div class="field-list__row">
+                <dt class="field-list__label">Best ever share :</dt>
+                <dd class="field-list__value">&mdash;</dd>
+              </div>
+              <div class="field-list__row">
+                <dt class="field-list__label">Authorised :</dt>
+                <dd class="field-list__value">&mdash;</dd>
+              </div>
+            </dl>
+          </div>
+          <div class="panel" id="panel-stats">
+            <h3 class="panel__title">Statistic</h3>
+            <dl class="field-list">
+              <div class="field-list__row">
+                <dt class="field-list__label">BTC price :</dt>
+                <dd class="field-list__value" id="btc-price">&mdash;</dd>
+              </div>
+              <div class="field-list__row">
+                <dt class="field-list__label">Subsidy :</dt>
+                <dd class="field-list__value">&mdash;</dd>
+              </div>
+              <div class="field-list__row">
+                <dt class="field-list__label">Subsidy value :</dt>
+                <dd class="field-list__value">&mdash;</dd>
+              </div>
+              <div class="field-list__row">
+                <dt class="field-list__label">Network difficulty :</dt>
+                <dd class="field-list__value">&mdash;</dd>
+              </div>
+              <div class="field-list__row">
+                <dt class="field-list__label">Odds per month :</dt>
+                <dd class="field-list__value">&mdash;</dd>
+              </div>
+              <div class="field-list__row">
+                <dt class="field-list__label">Odds per year :</dt>
+                <dd class="field-list__value">&mdash;</dd>
+              </div>
+              <div class="field-list__row">
+                <dt class="field-list__label">Odds by 2140 :</dt>
+                <dd class="field-list__value">&mdash;</dd>
+              </div>
+              <div class="field-list__row">
+                <dt class="field-list__label">Next halving ETA :</dt>
+                <dd class="field-list__value">&mdash;</dd>
+              </div>
+            </dl>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <div class="container footer__inner">
+        <span id="footer-brand">ck-hasher Dashboard</span>
+        <span class="numeric">
+          Data provided by
+          <a
+            class="footer__link"
+            href="https://github.com/DOCKPORT"
+            target="_blank"
+            rel="noopener noreferrer"
+          >ck-pool</a>
+          &amp;
+          <a
+            class="footer__link"
+            href="https://mempool.space/"
+            target="_blank"
+            rel="noopener noreferrer"
+          >mempool</a>
+          &amp;
+          <a
+            class="footer__link"
+            href="https://www.coinbase.com/"
+            target="_blank"
+            rel="noopener noreferrer"
+          >Coinbase</a>
+        </span>
+        <span id="footer-year" class="numeric"></span>
+      </div>
+    </footer>
+
+    <!-- The page has no build step. Serve this folder over HTTP. The version
+         module loads first, so the footer and the search can read the value. -->
+    <script src="js/version.js"></script>
+    <!-- The address search. It adds one function to the shared namespace. -->
+    <script src="js/address-search.js"></script>
+    <!-- The live BTC price feed. It adds one function to the shared namespace. -->
+    <script src="js/price-feed.js"></script>
+    <script src="js/main.js"></script>
+  </body>
+</html>

@@ -1,0 +1,417 @@
+/* ==========================================================================
+   ck-hasher — Components
+   Depends on css/theme.css and css/base.css. Load those files first.
+   The narrow screen rules live in css/mobile.css. Load that file last, so the
+   narrow rules win the cascade.
+   ========================================================================== */
+
+/* --- Top bar -------------------------------------------------------------- */
+.topbar {
+  position: sticky;
+  inset-block-start: 0;
+  z-index: var(--z-sticky);
+  /* The status bar sits over the page in a standalone web app. */
+  padding-block-start: env(safe-area-inset-top);
+  border-block-end: 1px solid var(--border);
+  /* The fill stays opaque, so the dot field never shows through the bar. */
+  background: var(--bg-page);
+}
+
+.topbar__inner {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  min-height: 60px;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-width: 0;
+}
+
+/* The brand mark holds a square view box and no clear space, so it needs no
+   padding. The parent gap sets the space before the name. */
+.brand__logo-link {
+  display: flex;
+  flex-shrink: 0;
+  text-decoration: none;
+}
+
+.brand__logo {
+  display: block;
+  inline-size: 28px;
+  block-size: 28px;
+}
+
+.brand__name {
+  font-size: var(--text-md);
+  font-weight: var(--weight-bold);
+  letter-spacing: var(--tracking-tight);
+  white-space: nowrap;
+}
+
+.brand__name span {
+  color: var(--text-muted);
+  font-weight: var(--weight-regular);
+}
+
+.topbar__meta {
+  margin-inline-start: auto;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  color: var(--text-faint);
+  font-size: var(--text-xs);
+}
+
+/* The brand mark links out. The text stays muted, so the rule drops the
+   underline that the global anchor rule adds. */
+.topbar__link {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--text-faint);
+  font-size: var(--text-md);
+  text-decoration: none;
+}
+
+.topbar__icon {
+  display: block;
+  inline-size: 28px;
+  block-size: 28px;
+  opacity: 0.7;
+}
+
+/* --- Main ----------------------------------------------------------------- */
+/* The page holds the search and the two panels. The main box grows to fill the
+   window, so the panels reach down to the footer. It stacks its bands. */
+.main {
+  display: flex;
+  flex-direction: column;
+  flex: 1 0 auto;
+}
+
+/* --- Card ----------------------------------------------------------------- */
+.card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: var(--space-5);
+}
+
+.card--raised {
+  background: var(--bg-raised);
+  border-color: var(--border);
+}
+
+/* A quiet accent border. One thickness on every edge. */
+.card--accent {
+  border-color: var(--accent-line);
+}
+
+.card__label {
+  display: block;
+  margin-block-end: var(--space-3);
+}
+
+/* --- Band spacing --------------------------------------------------------- */
+/* The search band keeps a short space below it, so the panels sit close under
+   the search bar. */
+.section.search-section {
+  padding-block: var(--space-5) var(--space-3);
+}
+
+/* The panel band grows to fill the rest of the page. Its grid fills the band,
+   so the panels run down to the footer. The short top space keeps the gap to
+   the search bar small. */
+.section.panel-section {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  padding-block: var(--space-2) var(--space-6);
+}
+
+/* --- Panel grid ----------------------------------------------------------- */
+/* Two placeholders sit side by side under the search bar. The two columns take
+   an equal share. Each holds a stats view in a later step. The grid fills the
+   band, so the panels run tall. A narrow screen stacks the two panels. */
+.panel-grid {
+  display: grid;
+  flex: 1 1 auto;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-4);
+}
+
+@media (max-width: 720px) {
+  .panel-grid {
+    grid-template-columns: 1fr;
+    grid-auto-rows: minmax(160px, 1fr);
+  }
+}
+
+/* --- Panel ---------------------------------------------------------------- */
+/* The panel holds a stats view in a later step. It takes a solid theme surface,
+   so it matches the cards. Min-height keeps an empty panel visible. */
+.panel {
+  min-block-size: 160px;
+  padding: var(--space-5);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  background: var(--bg-surface);
+}
+
+/* The panel title. It reads as a label, like the reference eyebrow style. */
+.panel__title {
+  margin-block-end: var(--space-4);
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  font-weight: var(--weight-medium);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-wider);
+  color: var(--text-faint);
+}
+
+/* --- Field list ----------------------------------------------------------- */
+/* A label-and-value list for one panel. Each row holds a label, a colon, and an
+   empty value slot. API data fills the slots in a later step. */
+.field-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.field-list__row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding-block: var(--space-3);
+  border-block-end: 1px solid var(--border-subtle);
+}
+
+.field-list__row:last-child {
+  border-block-end: none;
+}
+
+.field-list__label {
+  color: var(--text-muted);
+  font-size: var(--text-base);
+}
+
+.field-list__value {
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-size: var(--text-base);
+  font-variant-numeric: tabular-nums;
+  text-align: end;
+}
+
+/* The 24 hour change beside the price. The symbol marks the direction. The
+   color marks it too: green up, red down, grey flat. */
+.price-change {
+  font-variant-numeric: tabular-nums;
+}
+
+.price-change--up {
+  color: var(--positive);
+}
+
+.price-change--down {
+  color: var(--negative);
+}
+
+.price-change--flat {
+  color: var(--text-muted);
+}
+
+/* --- Search --------------------------------------------------------------- */
+/* The address search sits at the top of the page, just under the top bar. */
+.search {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.search__label {
+  display: block;
+}
+
+/* The field holds the address. The button sits at its end on a wide screen and
+   stacks below it on a narrow one. */
+.search__row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+.search__input {
+  flex: 1 1 320px;
+  min-width: 0;
+  padding: 0.7rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  /* The fill stays opaque, so a dot never shows through the field. */
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  transition: border-color var(--duration-fast) var(--ease-out);
+}
+
+.search__input::placeholder {
+  color: var(--text-faint);
+}
+
+/* The global teal focus ring is off here. A light grey line marks the focus. */
+.search__input:focus-visible {
+  outline: none;
+  box-shadow: none;
+  border-color: var(--grey-400);
+}
+
+/* The status line reports the result of a search. It keeps its height, so the
+   page does not move when the text arrives. */
+.search__status {
+  min-block-size: 1.5rem;
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+}
+
+.search__status[data-state="error"] {
+  color: var(--negative);
+}
+
+/* --- Button --------------------------------------------------------------- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: 0.7rem 1.1rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--bg-raised);
+  color: var(--text-primary);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  white-space: nowrap;
+  transition: background-color var(--duration-fast) var(--ease-out),
+    border-color var(--duration-fast) var(--ease-out),
+    transform var(--duration-fast) var(--ease-out);
+}
+
+.btn:active {
+  transform: translateY(1px);
+}
+
+/* The search button. A subtle grey square that holds a search icon only. The
+   muted icon lifts to the primary text color under the pointer. */
+.btn--icon {
+  padding: 0;
+  inline-size: 2.75rem;
+  min-block-size: 2.75rem;
+  color: var(--text-muted);
+}
+
+.btn--icon .btn__icon {
+  inline-size: 18px;
+  block-size: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+
+/* --- Footer --------------------------------------------------------------- */
+.footer {
+  margin-block-start: auto;
+  padding-block: var(--space-6);
+  /* The home indicator sits over the page on a modern phone. */
+  padding-block-end: max(var(--space-6), env(safe-area-inset-bottom));
+  /* iPad Safari lays the page out against the large viewport. The visible area
+     is then shorter than that box by the height of the browser bars. The last
+     band of the page can then hide at the bottom edge. This reserve covers
+     that band, so the last line stays in view. Both units are constant, so the
+     page does not shift while it moves. A browser without the units keeps the
+     value above. */
+  padding-block-end: calc(
+    max(var(--space-6), env(safe-area-inset-bottom)) +
+      clamp(0px, 100lvh - 100svh, 8rem)
+  );
+  /* The fill stays opaque, so the dot field never shows through the band. The
+     value matches the top bar, so the two chrome bands read as one pair. */
+  background: var(--bg-page);
+  border-block-start: 1px solid var(--border-subtle);
+  color: var(--text-faint);
+  font-size: var(--text-xs);
+}
+
+.footer__inner {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* The data source links. They take the faint footer grey, so the line stays
+   quiet. The rule drops the underline that the global anchor rule adds. */
+.footer__link {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* --- Pointer -------------------------------------------------------------- */
+/* Hover belongs to a mouse. A touch screen reads the pressed state only, so a
+   tap never leaves a control lit after the finger lifts. */
+@media (hover: hover) {
+  a:hover {
+    text-decoration-color: currentColor;
+  }
+
+  .topbar__link:hover {
+    color: var(--text-muted);
+  }
+
+  /* The data source link lifts one grey step and shows its underline. */
+  .footer__link:hover {
+    color: var(--text-muted);
+    text-decoration: underline;
+    text-decoration-color: currentColor;
+  }
+
+  .topbar__link:hover .topbar__icon {
+    opacity: 1;
+  }
+
+  .btn:hover {
+    border-color: var(--border-strong);
+  }
+
+  .btn--icon:hover {
+    color: var(--text-primary);
+  }
+
+  .search__input:hover {
+    border-color: var(--border-strong);
+  }
+}
+
+/* --- Motion --------------------------------------------------------------- */
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.animate-rise {
+  animation: rise var(--duration-slow) var(--ease-out) both;
+}

@@ -1,0 +1,163 @@
+/* ==========================================================================
+   ck-hasher — Theme tokens
+   Dark only. Greys carry structure. Bitcoin orange carries emphasis.
+   No gradients. No glow. Flat fills and hard rules only.
+   Load this file before any other stylesheet.
+   ========================================================================== */
+
+:root {
+  color-scheme: dark;
+
+  /* --- Grey ramp --------------------------------------------------------- */
+  --grey-000: #ffffff;
+  --grey-050: #f4f4f6;
+  --grey-100: #ececef;
+  --grey-200: #c6c6cd;
+  --grey-300: #9d9da7;
+  --grey-400: #86868f;
+  --grey-500: #3d3d47;
+  --grey-600: #2e2e36;
+  --grey-700: #24242a;
+  --grey-800: #1b1b1f;
+  --grey-850: #151518;
+  --grey-900: #101013;
+  --grey-950: #0b0b0d;
+
+  /* --- Bitcoin orange accents -------------------------------------------- */
+  --btc-orange: #f7931a;
+  --btc-amber: #ffb74d;
+  --btc-yellow: #f9d423;
+  --btc-gold: #ff9f1c;
+  --btc-red: #ff5d3b;
+  --btc-green: #2ebd85;
+
+  /* Tinted support shades. Use for soft fills, never for text. */
+  --btc-orange-deep: #c26a00;
+  --btc-amber-deep: #b3701a;
+  --btc-gold-deep: #a87b12;
+
+  /* --- Typography -------------------------------------------------------- */
+  --font-display: "Chivo", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --font-body: var(--font-display);
+  --font-mono: "Geist Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+
+  /* Fluid scale. Clamp keeps the small end readable and the large end calm. */
+  --text-2xs: 0.75rem;
+  --text-xs: 0.8125rem;
+  --text-sm: 0.875rem;
+  --text-base: 0.9375rem;
+  --text-md: 1.0625rem;
+  --text-lg: clamp(1.25rem, 0.6vw + 1.1rem, 1.5rem);
+  --text-xl: clamp(1.75rem, 1.2vw + 1.45rem, 2.25rem);
+  --text-2xl: clamp(2.5rem, 3vw + 1.7rem, 4rem);
+
+  --leading-tight: 1.15;
+  --leading-snug: 1.35;
+  --leading-normal: 1.6;
+
+  --tracking-tight: -0.02em;
+  --tracking-wide: 0.08em;
+  --tracking-wider: 0.14em;
+
+  --weight-regular: 400;
+  --weight-medium: 500;
+  --weight-bold: 700;
+
+  /* --- Space ------------------------------------------------------------- */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-7: 3rem;
+  --space-8: 4rem;
+  --space-9: 6rem;
+
+  --gutter: clamp(1rem, 3vw, 2.5rem);
+  --measure: 68ch;
+
+  /* --- Radius ------------------------------------------------------------ */
+  /* Square edges read as formal. Cards and buttons take 4px. Small parts take 2px. */
+  --radius-xs: 2px;
+  --radius-md: 4px;
+  --radius-lg: 4px;
+
+  /* --- Motion ------------------------------------------------------------ */
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --duration-fast: 120ms;
+  --duration-base: 200ms;
+  --duration-slow: 420ms;
+
+  /* --- Layer ------------------------------------------------------------- */
+  /* The dot field sits under the page fill. Only css/dots.css reads this
+     value. A negative layer paints over the page fill and under every line of
+     content. */
+  --z-under: -1;
+  --z-base: 0;
+  --z-raised: 10;
+  --z-sticky: 100;
+  --z-overlay: 1000;
+}
+
+/* Semantic tokens. Views read these, not the raw ramp. */
+:root {
+  /* Surfaces */
+  --bg-page: var(--grey-950);
+  --bg-surface: var(--grey-900);
+  --bg-raised: var(--grey-800);
+  /* The veiled fill for a glass header. The rows below show through it. */
+  --bg-veil: color-mix(in srgb, var(--grey-800) 72%, transparent);
+  --bg-sunken: var(--grey-850);
+  --bg-hover: var(--grey-700);
+  --bg-active: var(--grey-600);
+
+  /* Dot field. The page shows an array of grey dots behind the content.
+     css/dots.css draws that array. The grey sits bright against the page fill,
+     so the dots read at a glance. The step holds the gap between two dots. */
+  --dot-color: var(--grey-600);
+  --dot-step: 14px;
+
+  /* Lines. Flat values only. No transparency. */
+  --border-subtle: var(--grey-700);
+  --border: var(--grey-600);
+  --border-strong: var(--grey-500);
+
+  /* Scrollbars. The standard properties read these two values.
+     The clear track lets the surface show through the rail. */
+  --scrollbar-thumb: var(--border-strong);
+  --scrollbar-track: transparent;
+
+  /* Text */
+  --text-primary: var(--grey-100);
+  --text-secondary: var(--grey-200);
+  --text-muted: var(--grey-300);
+  --text-faint: var(--grey-400);
+  --text-inverse: var(--grey-950);
+
+  /* Accents */
+  --accent: var(--btc-orange);
+  --accent-alt: var(--btc-amber);
+  --accent-contrast: var(--grey-000);
+  --negative: var(--btc-red);
+  --positive: var(--btc-green);
+
+  /* Solid accent fills. The theme has no gradients and no glow. The line takes
+     the bright gold, so the metric hero and the selected control read at a
+     glance. */
+  --accent-soft: #3a2606;
+  --accent-line: var(--btc-gold);
+
+  /* Focus. A solid double ring for access, not a glow. */
+  --focus-ring: 0 0 0 2px var(--bg-page), 0 0 0 4px var(--accent-alt);
+}
+
+/* Reduced motion: cut every duration token to zero. */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --duration-fast: 0ms;
+    --duration-base: 0ms;
+    --duration-slow: 0ms;
+  }
+}

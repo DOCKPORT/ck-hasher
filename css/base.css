@@ -1,0 +1,168 @@
+/* ==========================================================================
+   ck-hasher — Base
+   Reset, typography, and layout. Depends on css/theme.css, so load that file
+   first. Load this file before css/style.css. The narrow screen rules live in
+   css/mobile.css. Load that file last.
+   ========================================================================== */
+
+/* --- Reset ---------------------------------------------------------------- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+* {
+  margin: 0;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  /* The pressed state carries the feedback. Drop the default grey flash. */
+  -webkit-tap-highlight-color: transparent;
+  /* Subtle bars in every scroll area, the table wraps included. The two
+     standard properties inherit. A browser that does not know them shows its
+     own bar, so nothing breaks. */
+  scrollbar-gutter: stable;
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+}
+
+body {
+  min-height: 100dvh;
+  background-color: var(--bg-page);
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  font-weight: var(--weight-regular);
+  line-height: var(--leading-normal);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  display: flex;
+  flex-direction: column;
+}
+
+img,
+svg,
+picture {
+  display: block;
+  max-width: 100%;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+  /* A tap acts at once. The control waits for no double-tap zoom. */
+  touch-action: manipulation;
+  background: none;
+  border: none;
+}
+
+a {
+  color: var(--accent-alt);
+  text-decoration-color: var(--btc-amber-deep);
+  text-underline-offset: 3px;
+}
+
+:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+::selection {
+  background: var(--btc-orange-deep);
+  color: var(--grey-000);
+}
+
+/* --- Typography ----------------------------------------------------------- */
+h1,
+h2,
+h3 {
+  font-family: var(--font-display);
+  font-weight: var(--weight-bold);
+  line-height: var(--leading-tight);
+  letter-spacing: var(--tracking-tight);
+  text-wrap: balance;
+}
+
+h1 {
+  font-size: var(--text-2xl);
+}
+
+h2 {
+  font-size: var(--text-xl);
+}
+
+h3 {
+  font-size: var(--text-lg);
+  font-weight: var(--weight-medium);
+}
+
+p {
+  max-width: var(--measure);
+  text-wrap: pretty;
+}
+
+/* Numbers hold a fixed width so columns stay aligned. */
+.numeric,
+.mono {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+  letter-spacing: -0.01em;
+}
+
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  font-weight: var(--weight-medium);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-wider);
+  color: var(--text-faint);
+}
+
+.text-muted {
+  color: var(--text-muted);
+}
+
+/* --- Layout --------------------------------------------------------------- */
+.container {
+  width: 100%;
+  max-width: 1240px;
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+  /* A landscape notch must not cover the first or the last column. */
+  padding-inline: max(var(--gutter), env(safe-area-inset-left))
+    max(var(--gutter), env(safe-area-inset-right));
+}
+
+.section {
+  padding-block: var(--space-7);
+}
+
+/* The page shows no rule between two bands. The gap alone divides them. The
+   first band takes a shorter top space, because the top bar holds it. */
+.section:first-of-type {
+  padding-block-start: var(--space-6);
+  padding-block-end: var(--space-6);
+}
+
+/* A band that follows another band takes a short top space. */
+.section + .section {
+  padding-block-start: var(--space-4);
+}
+
+.section-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-3);
+  margin-block-end: var(--space-5);
+}
