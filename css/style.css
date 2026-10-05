@@ -170,7 +170,7 @@
   font-weight: var(--weight-medium);
   text-transform: uppercase;
   letter-spacing: var(--tracking-wider);
-  color: var(--text-faint);
+  color: var(--accent);
 }
 
 /* --- Field list ----------------------------------------------------------- */
@@ -235,6 +235,7 @@
 
 .search__label {
   display: block;
+  font-weight: var(--weight-bold);
 }
 
 /* The field holds the address. The button sits at its end on a wide screen and
@@ -313,6 +314,7 @@
 /* The search button. A subtle grey square that holds a search icon only. The
    muted icon lifts to the primary text color under the pointer. */
 .btn--icon {
+  flex: none;
   padding: 0;
   inline-size: 2.75rem;
   min-block-size: 2.75rem;

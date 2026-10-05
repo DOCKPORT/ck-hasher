@@ -236,8 +236,43 @@
   };
 
   /**
+   * Read the address from the page URL.
+   * @returns {string} The address, or an empty string.
+   */
+  const readUrlAddress = () => {
+    const search = page.location ? page.location.search : "";
+    if (typeof search !== "string" || search === "") {
+      return "";
+    }
+    try {
+      const params = new URLSearchParams(search);
+      return (params.get("address") || "").trim();
+    } catch (error) {
+      return "";
+    }
+  };
+
+  /**
+   * Write the address into the page URL. The history entry is replaced, so the
+   * back button stays clean. A plain bookmark then keeps the address.
+   * @param {string} address - The Bitcoin address.
+   * @returns {void}
+   */
+  const writeUrlAddress = (address) => {
+    if (!page.history || typeof page.history.replaceState !== "function") {
+      return;
+    }
+    page.history.replaceState(
+      null,
+      "",
+      `?address=${encodeURIComponent(address)}`,
+    );
+  };
+
+  /**
    * Wire the address search form. A submit reads the field, checks the shape,
-   * and starts the lookup.
+   * and starts the lookup. An address in the URL runs at once, so a bookmark
+   * works.
    * @returns {void}
    */
   ns.initAddressSearch = () => {
@@ -251,6 +286,13 @@
       !(status instanceof HTMLElement)
     ) {
       return;
+    }
+
+    /* An address in the URL runs at once, so a bookmark opens the miner. */
+    const fromUrl = readUrlAddress();
+    if (ADDRESS_PATTERN.test(fromUrl)) {
+      input.value = fromUrl;
+      lookup(fromUrl, status);
     }
 
     form.addEventListener("submit", (event) => {
@@ -273,6 +315,7 @@
         return;
       }
 
+      writeUrlAddress(address);
       lookup(address, status);
     });
   };

@@ -16,3 +16,9 @@
 .footer__inner {
   justify-content: flex-start;
 }
+
+/* The field and the button share one row. The button keeps the right end, so
+   it never drops to the next line and sits at the left. */
+.search__row {
+  flex-wrap: nowrap;
+}
