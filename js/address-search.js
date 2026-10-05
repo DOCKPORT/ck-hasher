@@ -230,7 +230,7 @@
     fillMiner(data);
     setStatus(
       status,
-      addressStatus("Showing the miner for ", address, "."),
+      addressStatus("Showing miner ", address, ""),
       "info",
     );
   };
