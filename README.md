@@ -17,9 +17,9 @@ address. The dashboard then shows the miner data and network data.
 - Python scripting
 - Vercel deployment
 
-## Status
+## Contribute
 
-Early project. The repository is under development. 
+If you would like to contribute, send BTC contributions here: `bc1qltty5ezggulw7nkl2dx3vmxvg6flyg5lajpjlp`
 
 ## Preview
 

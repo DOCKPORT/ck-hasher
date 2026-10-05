@@ -32,24 +32,6 @@
   const RENDER_INTERVAL_MS = 1000;
 
   /**
-   * Format a price string as US dollars.
-   * @param {string} value - The raw price from the feed.
-   * @returns {string} The price, or an em dash on a bad value.
-   */
-  const formatUsd = (value) => {
-    const amount = Number(value);
-    if (!Number.isFinite(amount)) {
-      return "\u2014";
-    }
-    return amount.toLocaleString("en-US", {
-      style: "currency",
-      currency: "USD",
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    });
-  };
-
-  /**
    * Read a finite number from a feed value.
    * @param {string} value - The raw value from the feed.
    * @returns {number | undefined} The number, or undefined on a bad value.
@@ -83,7 +65,7 @@
    */
   const paint = (slot, info) => {
     slot.textContent = "";
-    slot.append(document.createTextNode(formatUsd(info.price)));
+    slot.append(document.createTextNode(ns.formatUsd(info.price)));
 
     const price = toNumber(info.price);
     const open = info.open24h;
@@ -117,8 +99,6 @@
       return;
     }
 
-    /** @type {WebSocket | undefined} */
-    let socket;
     /** The number of failed tries since the last success. */
     let attempt = 0;
     /** The latest ticker values. A new object marks a fresh value. */
@@ -154,7 +134,8 @@
     };
 
     const connect = () => {
-      socket = new WebSocket(ENDPOINT);
+      /* The handlers act on this one connection, never on a later one. */
+      const socket = new WebSocket(ENDPOINT);
 
       socket.addEventListener("open", () => {
         attempt = 0;

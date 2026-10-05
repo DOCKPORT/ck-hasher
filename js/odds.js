@@ -26,8 +26,6 @@
   const page = window;
   const ns = page.CKHASHER || (page.CKHASHER = {});
 
-  /** The empty value. */
-  const EMPTY = "\u2014";
   /** The hashes per difficulty share. This is 2 to the 32, 4,294,967,296. */
   const HASHES_PER_DIFF = 4294967296;
   /** The seconds in a month. */
@@ -39,19 +37,6 @@
 
   /** The two inputs from the other modules. */
   const state = { hashrate: null, difficulty: null };
-
-  /**
-   * Write a value into one field, or the empty mark on a missing value.
-   * @param {string} selector - The field selector.
-   * @param {string} [text] - The text to write.
-   * @returns {void}
-   */
-  const setField = (selector, text) => {
-    const slot = document.querySelector(selector);
-    if (slot instanceof HTMLElement) {
-      slot.textContent = text === undefined || text === "" ? EMPTY : text;
-    }
-  };
 
   /**
    * Format an odds count as "1 in <number>".
@@ -85,20 +70,21 @@
    * @returns {void}
    */
   const render = () => {
-    setField("#odds-month", oddsFor(SECONDS_MONTH));
-    setField("#odds-year", oddsFor(SECONDS_YEAR));
+    ns.setField("#odds-month", oddsFor(SECONDS_MONTH));
+    ns.setField("#odds-year", oddsFor(SECONDS_YEAR));
     const until2140 = (YEAR_2140_MS - Date.now()) / 1000;
-    setField("#odds-2140", oddsFor(until2140));
+    ns.setField("#odds-2140", oddsFor(until2140));
   };
 
   /**
-   * Take the miner hash rate from the address search.
+   * Take the miner hash rate from the address search. A zero value clears the
+   * odds, so an old miner does not stay on screen.
    * @param {unknown} hashrate - The miner hash rate in hashes per second.
    * @returns {void}
    */
   ns.setMinerHashrate = (hashrate) => {
     const value = Number(hashrate);
-    if (Number.isFinite(value) && value > 0) {
+    if (Number.isFinite(value) && value >= 0) {
       state.hashrate = value;
       render();
     }

@@ -51,9 +51,6 @@
     }
   };
 
-  stampYear();
-  stampVersion();
-
   /**
    * Run one init function from the shared namespace. A failure in one part
    * must not stop another part.
@@ -72,8 +69,24 @@
     }
   };
 
-  run("initAddressSearch");
-  run("initPriceFeed");
-  run("initNetworkFeed");
-  run("initPoolFeed");
+  /**
+   * Stamp the footer and start each page part.
+   * @returns {void}
+   */
+  const boot = () => {
+    stampYear();
+    stampVersion();
+    run("initAddressSearch");
+    run("initPriceFeed");
+    run("initNetworkFeed");
+    run("initPoolFeed");
+  };
+
+  /* The script may sit in the head, so wait for the document when the parser
+     has not built the page yet. */
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", boot);
+  } else {
+    boot();
+  }
 })();

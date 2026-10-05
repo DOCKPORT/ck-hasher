@@ -23,22 +23,6 @@
   const page = window;
   const ns = page.CKHASHER || (page.CKHASHER = {});
 
-  /** The empty value. */
-  const EMPTY = "\u2014";
-
-  /**
-   * Write a value into one field, or the empty mark on a missing value.
-   * @param {string} selector - The field selector.
-   * @param {string} [text] - The text to write.
-   * @returns {void}
-   */
-  const setField = (selector, text) => {
-    const slot = document.querySelector(selector);
-    if (slot instanceof HTMLElement) {
-      slot.textContent = text === undefined || text === "" ? EMPTY : text;
-    }
-  };
-
   /**
    * Write the pool row from a pool reply.
    * @param {Record<string, unknown>} data - The pool reply.
@@ -49,7 +33,7 @@
       typeof ns.formatHashrate === "function"
         ? ns.formatHashrate(data.hashrate)
         : undefined;
-    setField("#ckpool-hashrate", hashrate);
+    ns.setField("#ckpool-hashrate", hashrate);
   };
 
   /**
@@ -57,17 +41,6 @@
    * @returns {void}
    */
   ns.initPoolFeed = () => {
-    fetch("/api/pool")
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error(String(response.status));
-        }
-        return response.json();
-      })
-      .then(fillPool)
-      .catch((error) => {
-        /* A failure leaves the empty mark in place. */
-        console.error("ck-hasher: the pool hashrate did not load", error);
-      });
+    ns.loadJson("/api/pool", "the pool hashrate", fillPool);
   };
 })();

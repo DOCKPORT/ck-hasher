@@ -23,35 +23,10 @@
   const page = window;
   const ns = page.CKHASHER || (page.CKHASHER = {});
 
-  /** The empty value. */
-  const EMPTY = "\u2014";
   /** One exahash in hashes per second. */
   const HASH_PER_EH = 1e18;
   /** One trillion in plain units. */
   const UNIT_PER_T = 1e12;
-
-  /**
-   * Write a value into one field, or the empty mark on a missing value.
-   * @param {string} selector - The field selector.
-   * @param {string} [text] - The text to write.
-   * @returns {void}
-   */
-  const setField = (selector, text) => {
-    const slot = document.querySelector(selector);
-    if (slot instanceof HTMLElement) {
-      slot.textContent = text === undefined || text === "" ? EMPTY : text;
-    }
-  };
-
-  /**
-   * Format a count with thousands separators.
-   * @param {unknown} value - The raw value.
-   * @returns {string | undefined} The text, or undefined on a bad value.
-   */
-  const formatCount = (value) => {
-    const amount = Number(value);
-    return Number.isFinite(amount) ? amount.toLocaleString("en-US") : undefined;
-  };
 
   /**
    * Scale a value and add the unit.
@@ -77,9 +52,9 @@
    * @returns {void}
    */
   const fillNetwork = (data) => {
-    setField("#block-height", formatCount(data.height));
-    setField("#network-difficulty", formatUnit(data.difficulty, UNIT_PER_T, "T"));
-    setField("#network-hashrate", formatUnit(data.hashrate, HASH_PER_EH, "EH/s"));
+    ns.setField("#block-height", ns.formatCount(data.height));
+    ns.setField("#network-difficulty", formatUnit(data.difficulty, UNIT_PER_T, "T"));
+    ns.setField("#network-hashrate", formatUnit(data.hashrate, HASH_PER_EH, "EH/s"));
 
     /* Hand the height to the subsidy module. */
     if (typeof ns.setBlockHeight === "function") {
@@ -97,17 +72,6 @@
    * @returns {void}
    */
   ns.initNetworkFeed = () => {
-    fetch("/api/network")
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error(String(response.status));
-        }
-        return response.json();
-      })
-      .then(fillNetwork)
-      .catch((error) => {
-        /* A failure leaves the empty marks in place. */
-        console.error("ck-hasher: the network data did not load", error);
-      });
+    ns.loadJson("/api/network", "the network data", fillNetwork);
   };
 })();

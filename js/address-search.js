@@ -29,9 +29,6 @@
   const ADDRESS_PATTERN =
     /^(bc1[a-z0-9]{25,89}|[13][a-km-zA-HJ-NP-Z1-9]{25,34})$/;
 
-  /** The empty value. */
-  const EMPTY = "\u2014";
-
   /** The four miner rows that the lookup fills. */
   const MINER_FIELDS = [
     "#miner-hashrate",
@@ -53,6 +50,9 @@
     [1e6, "M"],
     [1e3, "k"],
   ];
+
+  /** The number of the newest lookup. A reply from an older lookup is dropped. */
+  let latestLookup = 0;
 
   /**
    * Set the status line and its color. An empty message clears the state.
@@ -95,34 +95,11 @@
   };
 
   /**
-   * Write a value into one field, or the empty mark on a missing value.
-   * @param {string} selector - The field selector.
-   * @param {string} [text] - The text to write.
-   * @returns {void}
-   */
-  const setField = (selector, text) => {
-    const slot = document.querySelector(selector);
-    if (slot instanceof HTMLElement) {
-      slot.textContent = text === undefined || text === "" ? EMPTY : text;
-    }
-  };
-
-  /**
    * Reset every miner field to the empty mark.
    * @returns {void}
    */
   const clearMiner = () => {
-    MINER_FIELDS.forEach((selector) => setField(selector));
-  };
-
-  /**
-   * Format a count with thousands separators.
-   * @param {unknown} value - The raw value.
-   * @returns {string | undefined} The text, or undefined on a bad value.
-   */
-  const formatCount = (value) => {
-    const amount = Number(value);
-    return Number.isFinite(amount) ? amount.toLocaleString("en-US") : undefined;
+    MINER_FIELDS.forEach((selector) => ns.setField(selector));
   };
 
   /**
@@ -171,37 +148,52 @@
       typeof ns.formatHashrate === "function"
         ? ns.formatHashrate(data.hashrate1m)
         : undefined;
-    setField("#miner-hashrate", hashrate);
+    ns.setField("#miner-hashrate", hashrate);
 
     /* Hand the numeric hash rate to the odds module. */
     if (typeof ns.setMinerHashrate === "function") {
       ns.setMinerHashrate(ns.parseHashrate(data.hashrate1m));
     }
 
-    setField("#miner-workers", formatCount(data.workers));
-    setField("#miner-bestever", formatShare(data.bestever));
-    setField("#miner-authorised", formatTime(data.authorised));
+    ns.setField("#miner-workers", ns.formatCount(data.workers));
+    ns.setField("#miner-bestever", formatShare(data.bestever));
+    ns.setField("#miner-authorised", formatTime(data.authorised));
   };
 
   /**
-   * Look the address up through the pool proxy and fill the miner rows.
+   * Look the address up through the pool proxy and fill the miner rows. An
+   * older in-flight lookup is dropped, so the newest search wins.
    * @param {string} address - The Bitcoin address.
    * @param {HTMLElement} status - The status element.
    * @returns {Promise<void>} Resolves when the lookup ends.
    */
   const lookup = async (address, status) => {
+    latestLookup += 1;
+    const lookupId = latestLookup;
     setStatus(status, `Looking up the miner for ${address}...`, "info");
     clearMiner();
+
+    /* Clear the odds rows, so an old miner does not stay on screen. */
+    if (typeof ns.setMinerHashrate === "function") {
+      ns.setMinerHashrate(0);
+    }
 
     let response;
     try {
       response = await fetch(`/api/user?address=${encodeURIComponent(address)}`);
     } catch (error) {
+      if (lookupId !== latestLookup) {
+        return;
+      }
       setStatus(
         status,
         "The pool did not answer. Check the connection and try again.",
         "error",
       );
+      return;
+    }
+
+    if (lookupId !== latestLookup) {
       return;
     }
 
@@ -223,7 +215,14 @@
     try {
       data = await response.json();
     } catch (error) {
+      if (lookupId !== latestLookup) {
+        return;
+      }
       setStatus(status, "The pool reply was not valid JSON.", "error");
+      return;
+    }
+
+    if (lookupId !== latestLookup) {
       return;
     }
 

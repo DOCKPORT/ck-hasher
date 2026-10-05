@@ -15,6 +15,7 @@ import json
 import time
 import urllib.error
 import urllib.request
+from concurrent.futures import ThreadPoolExecutor
 from http.server import BaseHTTPRequestHandler
 
 HEIGHT_URL = "https://mempool.space/api/blocks/tip/height"
@@ -39,8 +40,11 @@ def _fetch(url: str) -> bytes | None:
 
 def _read_network() -> tuple[int, object]:
     """Fetch and shape the network data from mempool.space."""
-    height_body = _fetch(HEIGHT_URL)
-    stats_body = _fetch(STATS_URL)
+    with ThreadPoolExecutor(max_workers=2) as pool:
+        height_future = pool.submit(_fetch, HEIGHT_URL)
+        stats_future = pool.submit(_fetch, STATS_URL)
+        height_body = height_future.result()
+        stats_body = stats_future.result()
     if height_body is None or stats_body is None:
         return 502, {"error": "mempool unreachable"}
 

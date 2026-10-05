@@ -27,8 +27,6 @@
   const page = window;
   const ns = page.CKHASHER || (page.CKHASHER = {});
 
-  /** The empty value. */
-  const EMPTY = "\u2014";
   /** One bitcoin in satoshis. */
   const SATS_PER_BTC = 1e8;
   /** The subsidy before the first halving, in satoshis (50 BTC). */
@@ -85,19 +83,6 @@
   const state = { height: null, price: null };
 
   /**
-   * Write a value into one field, or the empty mark on a missing value.
-   * @param {string} selector - The field selector.
-   * @param {string} [text] - The text to write.
-   * @returns {void}
-   */
-  const setField = (selector, text) => {
-    const slot = document.querySelector(selector);
-    if (slot instanceof HTMLElement) {
-      slot.textContent = text === undefined || text === "" ? EMPTY : text;
-    }
-  };
-
-  /**
    * Read the block subsidy at one height, in satoshis.
    * @param {number} height - The block height.
    * @returns {number} The subsidy in satoshis.
@@ -137,18 +122,6 @@
     const btc = sats / SATS_PER_BTC;
     return `${btc.toLocaleString("en-US", { maximumFractionDigits: 8 })} BTC`;
   };
-
-  /**
-   * Format a value as US dollars.
-   * @param {number} value - The value in dollars.
-   * @returns {string} The text, for example "$270,000.00".
-   */
-  const formatUsd = (value) =>
-    value.toLocaleString("en-US", {
-      style: "currency",
-      currency: "USD",
-      maximumFractionDigits: 2,
-    });
 
   /**
    * Format a duration in the short form, for example "1y 6m 8d". Zero units
@@ -198,20 +171,20 @@
     }
 
     const subsidy = subsidyAt(state.height);
-    setField("#subsidy", formatBtc(subsidy));
+    ns.setField("#subsidy", formatBtc(subsidy));
 
     const next = nextHalvingHeight(state.height);
     if (next === null) {
-      setField("#next-halving-eta", "no more halvings");
+      ns.setField("#next-halving-eta", "no more halvings");
     } else {
       const etaMs = (next - state.height) * BLOCK_MINUTES * 60000;
-      setField("#next-halving-eta", formatEta(etaMs));
+      ns.setField("#next-halving-eta", formatEta(etaMs));
     }
 
     if (state.price !== null) {
-      setField(
+      ns.setField(
         "#subsidy-value",
-        formatUsd((subsidy / SATS_PER_BTC) * state.price),
+        ns.formatUsd((subsidy / SATS_PER_BTC) * state.price),
       );
     }
   };
