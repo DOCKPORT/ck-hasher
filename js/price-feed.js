@@ -98,6 +98,11 @@
       slot.append(document.createTextNode(" "));
       slot.append(marker);
     }
+
+    /* Hand the price to the subsidy module for the subsidy value. */
+    if (price !== undefined && typeof ns.setBtcPrice === "function") {
+      ns.setBtcPrice(price);
+    }
   };
 
   /**

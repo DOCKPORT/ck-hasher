@@ -249,7 +249,7 @@
   flex: 1 1 320px;
   min-width: 0;
   padding: 0.7rem 1rem;
-  border: 1px solid var(--border);
+  border: 1px solid var(--border-accent);
   border-radius: var(--radius-md);
   /* The fill stays opaque, so a dot never shows through the field. */
   background: var(--bg-surface);
@@ -280,6 +280,11 @@
 
 .search__status[data-state="error"] {
   color: var(--negative);
+}
+
+/* The address inside the success line. It takes the bright Bitcoin orange. */
+.status__address {
+  color: var(--accent);
 }
 
 /* --- Button --------------------------------------------------------------- */
@@ -393,10 +398,6 @@
 
   .btn--icon:hover {
     color: var(--text-primary);
-  }
-
-  .search__input:hover {
-    border-color: var(--border-strong);
   }
 }
 

@@ -10,6 +10,8 @@
  * @property {string} [version] - The release version from js/version.js.
  * @property {() => void} [initAddressSearch] - Wire the address search form.
  * @property {() => void} [initPriceFeed] - Open the live BTC price feed.
+ * @property {() => void} [initNetworkFeed] - Read the network data once.
+ * @property {() => void} [initPoolFeed] - Read the pool hashrate once.
  */
 
 (() => {
@@ -52,13 +54,26 @@
   stampYear();
   stampVersion();
 
-  /* Wire the address search when the module is present. */
-  if (ns && typeof ns.initAddressSearch === "function") {
-    ns.initAddressSearch();
-  }
+  /**
+   * Run one init function from the shared namespace. A failure in one part
+   * must not stop another part.
+   * @param {string} name - The namespace key.
+   * @returns {void}
+   */
+  const run = (name) => {
+    const fn = ns ? ns[name] : undefined;
+    if (typeof fn !== "function") {
+      return;
+    }
+    try {
+      fn();
+    } catch (error) {
+      console.error(`ck-hasher: ${name} failed`, error);
+    }
+  };
 
-  /* Open the live BTC price feed when the module is present. */
-  if (ns && typeof ns.initPriceFeed === "function") {
-    ns.initPriceFeed();
-  }
+  run("initAddressSearch");
+  run("initPriceFeed");
+  run("initNetworkFeed");
+  run("initPoolFeed");
 })();

@@ -26,15 +26,15 @@
 
     <!-- The version token marks a stylesheet change. A browser then fetches the
          new file in place of the cached one. Bump the token after a style edit. -->
-    <link rel="stylesheet" href="css/theme.css?v=1" />
-    <link rel="stylesheet" href="css/base.css?v=1" />
+    <link rel="stylesheet" href="css/theme.css?v=7" />
+    <link rel="stylesheet" href="css/base.css?v=7" />
     <!-- The dot field. This module draws the page background array. -->
-    <link rel="stylesheet" href="css/dots.css?v=1" />
-    <link rel="stylesheet" href="css/style.css?v=1" />
+    <link rel="stylesheet" href="css/dots.css?v=7" />
+    <link rel="stylesheet" href="css/style.css?v=7" />
     <!-- The narrow screen rules. This link stays last, so those rules win. -->
     <link
       rel="stylesheet"
-      href="css/mobile.css?v=1"
+      href="css/mobile.css?v=7"
       media="(max-width: 720px)"
     />
   </head>
@@ -77,11 +77,10 @@
     <!-- The address search sits below the top bar. The views arrive in a later
          step, so the page holds the search alone for now. -->
     <main class="container main" id="app">
-      <section class="section search-section" aria-labelledby="search-title">
-        <h2 id="search-title" class="section-head">Find your miner</h2>
+      <section class="section search-section">
         <form class="search" id="address-form" novalidate>
           <label class="search__label eyebrow" for="address-input">
-            Bitcoin address
+            Enter the Bitcoin address of the CKpool miner
           </label>
           <div class="search__row">
             <input
@@ -93,7 +92,7 @@
               autocomplete="off"
               autocapitalize="off"
               spellcheck="false"
-              placeholder="Enter a Bitcoin address"
+              placeholder="Enter address"
               aria-describedby="address-status"
             />
             <button class="btn btn--icon" type="submit" aria-label="Find miner">
@@ -145,15 +144,15 @@
               </div>
               <div class="field-list__row">
                 <dt class="field-list__label">Odds per month :</dt>
-                <dd class="field-list__value">&mdash;</dd>
+                <dd class="field-list__value" id="odds-month">&mdash;</dd>
               </div>
               <div class="field-list__row">
                 <dt class="field-list__label">Odds per year :</dt>
-                <dd class="field-list__value">&mdash;</dd>
+                <dd class="field-list__value" id="odds-year">&mdash;</dd>
               </div>
               <div class="field-list__row">
                 <dt class="field-list__label">Odds by 2140 :</dt>
-                <dd class="field-list__value">&mdash;</dd>
+                <dd class="field-list__value" id="odds-2140">&mdash;</dd>
               </div>
             </dl>
           </div>
@@ -165,28 +164,32 @@
                 <dd class="field-list__value" id="btc-price">&mdash;</dd>
               </div>
               <div class="field-list__row">
+                <dt class="field-list__label">Block height :</dt>
+                <dd class="field-list__value" id="block-height">&mdash;</dd>
+              </div>
+              <div class="field-list__row">
                 <dt class="field-list__label">Subsidy :</dt>
-                <dd class="field-list__value">&mdash;</dd>
+                <dd class="field-list__value" id="subsidy">&mdash;</dd>
               </div>
               <div class="field-list__row">
                 <dt class="field-list__label">Subsidy value :</dt>
-                <dd class="field-list__value">&mdash;</dd>
+                <dd class="field-list__value" id="subsidy-value">&mdash;</dd>
               </div>
               <div class="field-list__row">
                 <dt class="field-list__label">Network difficulty :</dt>
-                <dd class="field-list__value">&mdash;</dd>
+                <dd class="field-list__value" id="network-difficulty">&mdash;</dd>
               </div>
               <div class="field-list__row">
                 <dt class="field-list__label">Network hashrate :</dt>
-                <dd class="field-list__value">&mdash;</dd>
+                <dd class="field-list__value" id="network-hashrate">&mdash;</dd>
               </div>
               <div class="field-list__row">
                 <dt class="field-list__label">CKpool hashrate :</dt>
-                <dd class="field-list__value">&mdash;</dd>
+                <dd class="field-list__value" id="ckpool-hashrate">&mdash;</dd>
               </div>
               <div class="field-list__row">
                 <dt class="field-list__label">Next halving ETA :</dt>
-                <dd class="field-list__value">&mdash;</dd>
+                <dd class="field-list__value" id="next-halving-eta">&mdash;</dd>
               </div>
             </dl>
           </div>
@@ -226,11 +229,21 @@
 
     <!-- The page has no build step. Serve this folder over HTTP. The version
          module loads first, so the footer and the search can read the value. -->
-    <script src="js/version.js"></script>
+    <script src="js/version.js?v=1"></script>
+    <!-- The shared format helpers. They add functions to the namespace. -->
+    <script src="js/format.js?v=1"></script>
     <!-- The address search. It adds one function to the shared namespace. -->
-    <script src="js/address-search.js"></script>
+    <script src="js/address-search.js?v=1"></script>
     <!-- The live BTC price feed. It adds one function to the shared namespace. -->
-    <script src="js/price-feed.js"></script>
-    <script src="js/main.js"></script>
+    <script src="js/price-feed.js?v=1"></script>
+    <!-- The network data feed. It adds one function to the shared namespace. -->
+    <script src="js/network-feed.js?v=1"></script>
+    <!-- The pool hashrate feed. It adds one function to the shared namespace. -->
+    <script src="js/pool-feed.js?v=1"></script>
+    <!-- The subsidy module. It adds two setters to the shared namespace. -->
+    <script src="js/subsidy.js?v=1"></script>
+    <!-- The odds module. It adds two setters to the shared namespace. -->
+    <script src="js/odds.js?v=1"></script>
+    <script src="js/main.js?v=1"></script>
   </body>
 </html>

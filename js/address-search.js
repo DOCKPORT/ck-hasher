@@ -12,6 +12,7 @@
  * @property {string} [version] - The release version from js/version.js.
  * @property {() => void} [initAddressSearch] - Wire the address search form.
  * @property {() => void} [initPriceFeed] - Open the live BTC price feed.
+ * @property {(hashrate: unknown) => void} [setMinerHashrate] - Take the miner hash rate.
  */
 
 (() => {
@@ -40,19 +41,57 @@
   ];
 
   /**
+   * The share units, largest first. Miners show a share as a number plus one of
+   * these letters, for example "423.57 G".
+   * @type {Array<[number, string]>}
+   */
+  const SHARE_UNITS = [
+    [1e18, "E"],
+    [1e15, "P"],
+    [1e12, "T"],
+    [1e9, "G"],
+    [1e6, "M"],
+    [1e3, "k"],
+  ];
+
+  /**
    * Set the status line and its color. An empty message clears the state.
    * @param {HTMLElement} slot - The status element.
-   * @param {string} message - The text to show.
+   * @param {string | Node} content - The text, or a node to append.
    * @param {"error"|"info"} state - The state name.
    * @returns {void}
    */
-  const setStatus = (slot, message, state) => {
-    slot.textContent = message;
+  const setStatus = (slot, content, state) => {
+    if (typeof content === "string") {
+      slot.textContent = content;
+    } else {
+      slot.textContent = "";
+      slot.append(content);
+    }
     if (state === "error") {
       slot.dataset.state = "error";
     } else {
       delete slot.dataset.state;
     }
+  };
+
+  /**
+   * Build a status line that holds the address in its own mark. The mark takes
+   * the accent color from css/style.css.
+   * @param {string} lead - The text before the address.
+   * @param {string} address - The Bitcoin address.
+   * @param {string} tail - The text after the address.
+   * @returns {DocumentFragment} The content for the status line.
+   */
+  const addressStatus = (lead, address, tail) => {
+    const fragment = document.createDocumentFragment();
+    fragment.append(document.createTextNode(lead));
+    const mark = document.createElement("span");
+    mark.className = "status__address";
+    mark.textContent = address;
+    fragment.append(mark);
+    fragment.append(document.createTextNode(tail));
+    return fragment;
   };
 
   /**
@@ -87,20 +126,30 @@
   };
 
   /**
-   * Format a share value. A share can be large or a small fraction.
+   * Format a share value in the miner style: a number plus a unit letter, for
+   * example "423.57 G". The largest unit that fits takes the letter. A value
+   * below one thousand stays a plain number.
    * @param {unknown} value - The raw value.
    * @returns {string | undefined} The text, or undefined on a bad value.
    */
   const formatShare = (value) => {
     const amount = Number(value);
-    if (!Number.isFinite(amount)) {
+    if (!Number.isFinite(amount) || amount < 0) {
       return undefined;
     }
-    return amount.toLocaleString("en-US", { maximumFractionDigits: 4 });
+    for (const [step, unit] of SHARE_UNITS) {
+      if (amount >= step) {
+        const scaled = amount / step;
+        return `${scaled.toLocaleString("en-US", {
+          maximumFractionDigits: 2,
+        })} ${unit}`;
+      }
+    }
+    return amount.toLocaleString("en-US", { maximumFractionDigits: 2 });
   };
 
   /**
-   * Format a Unix time in seconds as a local date and time.
+   * Format a Unix time in seconds as a local date. The time of day drops.
    * @param {unknown} value - The raw value.
    * @returns {string | undefined} The text, or undefined on a bad value.
    */
@@ -109,7 +158,7 @@
     if (!Number.isFinite(seconds) || seconds <= 0) {
       return undefined;
     }
-    return new Date(seconds * 1000).toLocaleString("en-US");
+    return new Date(seconds * 1000).toLocaleDateString("en-US");
   };
 
   /**
@@ -118,11 +167,17 @@
    * @returns {void}
    */
   const fillMiner = (data) => {
-    const hashrate = data.hashrate1m;
-    setField(
-      "#miner-hashrate",
-      typeof hashrate === "string" ? hashrate : undefined,
-    );
+    const hashrate =
+      typeof ns.formatHashrate === "function"
+        ? ns.formatHashrate(data.hashrate1m)
+        : undefined;
+    setField("#miner-hashrate", hashrate);
+
+    /* Hand the numeric hash rate to the odds module. */
+    if (typeof ns.setMinerHashrate === "function") {
+      ns.setMinerHashrate(ns.parseHashrate(data.hashrate1m));
+    }
+
     setField("#miner-workers", formatCount(data.workers));
     setField("#miner-bestever", formatShare(data.bestever));
     setField("#miner-authorised", formatTime(data.authorised));
@@ -173,7 +228,11 @@
     }
 
     fillMiner(data);
-    setStatus(status, `Showing the miner for ${address}.`, "info");
+    setStatus(
+      status,
+      addressStatus("Showing the miner for ", address, "."),
+      "info",
+    );
   };
 
   /**

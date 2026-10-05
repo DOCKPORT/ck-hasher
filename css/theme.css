@@ -123,6 +123,8 @@
   --border-subtle: var(--grey-700);
   --border: var(--grey-600);
   --border-strong: var(--grey-500);
+  /* A quiet orange line. The search input and the two panels take it. */
+  --border-accent: var(--btc-orange-deep);
 
   /* Scrollbars. The standard properties read these two values.
      The clear track lets the surface show through the rail. */
@@ -132,8 +134,8 @@
   /* Text */
   --text-primary: var(--grey-100);
   --text-secondary: var(--grey-200);
-  --text-muted: var(--grey-300);
-  --text-faint: var(--grey-400);
+  --text-muted: var(--grey-200);
+  --text-faint: var(--grey-200);
   --text-inverse: var(--grey-950);
 
   /* Accents */
