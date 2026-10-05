@@ -6,7 +6,7 @@ address. The dashboard then shows the miner data and network data.
 
 ## Data Sources
 
-- **ck-pool.** Look up address to find workers https://solo.ckpool.org/users/
+- **CK-Pool.** Look up address to find workers. https://solo.ckpool.org/
 - **Coinbase WebSocket.** The feed returns the live BTC price.
 - **Mempool.space** Fetches the block height,
   the network difficulty and more.
