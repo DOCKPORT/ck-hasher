@@ -122,39 +122,43 @@
       <!-- The two stats placeholders sit side by side under the search bar. The
            left panel is the narrow one. The views that fill them arrive in a
            later step, so they stay empty below the titles. -->
-      <section class="section panel-section" aria-label="Miner stats">
+      <section class="section panel-section" aria-label="Miner and network data">
         <div class="panel-grid">
           <div class="panel" id="panel-status">
             <h3 class="panel__title">Miner Data</h3>
             <dl class="field-list">
               <div class="field-list__row">
                 <dt class="field-list__label">Hash rate :</dt>
-                <dd class="field-list__value">&mdash;</dd>
+                <dd class="field-list__value" id="miner-hashrate">&mdash;</dd>
               </div>
               <div class="field-list__row">
                 <dt class="field-list__label">Workers :</dt>
-                <dd class="field-list__value">&mdash;</dd>
-              </div>
-              <div class="field-list__row">
-                <dt class="field-list__label">Total shares :</dt>
-                <dd class="field-list__value">&mdash;</dd>
-              </div>
-              <div class="field-list__row">
-                <dt class="field-list__label">Last share :</dt>
-                <dd class="field-list__value">&mdash;</dd>
+                <dd class="field-list__value" id="miner-workers">&mdash;</dd>
               </div>
               <div class="field-list__row">
                 <dt class="field-list__label">Best ever share :</dt>
-                <dd class="field-list__value">&mdash;</dd>
+                <dd class="field-list__value" id="miner-bestever">&mdash;</dd>
               </div>
               <div class="field-list__row">
                 <dt class="field-list__label">Authorised :</dt>
+                <dd class="field-list__value" id="miner-authorised">&mdash;</dd>
+              </div>
+              <div class="field-list__row">
+                <dt class="field-list__label">Odds per month :</dt>
+                <dd class="field-list__value">&mdash;</dd>
+              </div>
+              <div class="field-list__row">
+                <dt class="field-list__label">Odds per year :</dt>
+                <dd class="field-list__value">&mdash;</dd>
+              </div>
+              <div class="field-list__row">
+                <dt class="field-list__label">Odds by 2140 :</dt>
                 <dd class="field-list__value">&mdash;</dd>
               </div>
             </dl>
           </div>
           <div class="panel" id="panel-stats">
-            <h3 class="panel__title">Statistic</h3>
+            <h3 class="panel__title">Network data</h3>
             <dl class="field-list">
               <div class="field-list__row">
                 <dt class="field-list__label">BTC price :</dt>
@@ -173,15 +177,11 @@
                 <dd class="field-list__value">&mdash;</dd>
               </div>
               <div class="field-list__row">
-                <dt class="field-list__label">Odds per month :</dt>
+                <dt class="field-list__label">Network hashrate :</dt>
                 <dd class="field-list__value">&mdash;</dd>
               </div>
               <div class="field-list__row">
-                <dt class="field-list__label">Odds per year :</dt>
-                <dd class="field-list__value">&mdash;</dd>
-              </div>
-              <div class="field-list__row">
-                <dt class="field-list__label">Odds by 2140 :</dt>
+                <dt class="field-list__label">CKpool hashrate :</dt>
                 <dd class="field-list__value">&mdash;</dd>
               </div>
               <div class="field-list__row">
