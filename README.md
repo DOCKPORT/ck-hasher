@@ -21,3 +21,6 @@ address. The dashboard then shows the miner data and network data.
 
 Early project. The repository is under development. 
 
+## Preview
+
+![ck-hasher](screenshots/view1.png)
