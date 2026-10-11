@@ -1,7 +1,8 @@
 /**
  * @file The Bitcoin network data feed. On page load it reads the block height,
- * the network difficulty, and the network hashrate from the pool proxy, and
- * writes them into the Network data panel. A failure leaves the empty marks.
+ * the network difficulty, the year-over-year difficulty change, and the network
+ * hashrate from the pool proxy, and writes them into the Network data panel. A
+ * failure leaves the empty marks.
  * The page has no build step, so this file adds one function to the shared
  * namespace from js/version.js. Load js/version.js before this file.
  */
@@ -47,13 +48,61 @@
   };
 
   /**
+   * Read the direction of a change. A flat value takes a dot.
+   * @param {number} value - The signed change value.
+   * @returns {{ name: string, symbol: string }} The class name and the symbol.
+   */
+  const readDirection = (value) => {
+    if (value > 0) {
+      return { name: "up", symbol: "\u2191" };
+    }
+    if (value < 0) {
+      return { name: "down", symbol: "\u2193" };
+    }
+    return { name: "flat", symbol: "\u2022" };
+  };
+
+  /**
+   * Write the difficulty and, beside it, the year-over-year change. The change
+   * takes a direction color: green up, red down, grey flat. A missing change
+   * leaves the difficulty alone.
+   * @param {string | undefined} text - The difficulty text.
+   * @param {unknown} change - The year-over-year change in percent.
+   * @returns {void}
+   */
+  const paintDifficulty = (text, change) => {
+    const slot = document.querySelector("#network-difficulty");
+    if (!(slot instanceof HTMLElement)) {
+      return;
+    }
+    slot.textContent = text === undefined || text === "" ? "\u2014" : text;
+
+    if (change === null || change === undefined || change === "") {
+      return;
+    }
+    const amount = Number(change);
+    if (!Number.isFinite(amount)) {
+      return;
+    }
+    const direction = readDirection(amount);
+    const marker = document.createElement("span");
+    marker.className = `price-change price-change--${direction.name}`;
+    marker.textContent = `${direction.symbol} ${Math.abs(amount).toFixed(2)}% YoY`;
+    slot.append(document.createTextNode(" "));
+    slot.append(marker);
+  };
+
+  /**
    * Write the network rows from a network reply.
    * @param {Record<string, unknown>} data - The network reply.
    * @returns {void}
    */
   const fillNetwork = (data) => {
     ns.setField("#block-height", ns.formatCount(data.height));
-    ns.setField("#network-difficulty", formatUnit(data.difficulty, UNIT_PER_T, "T"));
+    paintDifficulty(
+      formatUnit(data.difficulty, UNIT_PER_T, "T"),
+      data.difficultyChange,
+    );
     ns.setField("#network-hashrate", formatUnit(data.hashrate, HASH_PER_EH, "EH/s"));
 
     /* Hand the height to the subsidy module. */

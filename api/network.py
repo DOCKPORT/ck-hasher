@@ -2,9 +2,10 @@
 
 Handle GET /api/network. Fetch the block height and the mining statistics from
 mempool.space, and return one small JSON with the height, the network
-difficulty, and the network hashrate. Vercel runs this file as a function, one
-call per request. The local dev_server.py imports fetch_network from this file,
-so the core logic lives in one place.
+difficulty, the year-over-year difficulty change, and the network hashrate.
+Vercel runs this file as a function, one call per request. The local
+dev_server.py imports fetch_network from this file, so the core logic lives in
+one place.
 
 The frontend calls the same path, /api/network, in both places.
 """
@@ -20,7 +21,10 @@ from http.server import BaseHTTPRequestHandler
 
 HEIGHT_URL = "https://mempool.space/api/blocks/tip/height"
 STATS_URL = "https://mempool.space/api/v1/mining/hashrate/3d"
+BLOCKS_URL = "https://mempool.space/api/blocks/{height}"
 TIMEOUT_SECONDS = 15
+# The blocks in one year at the 10 minute target: 6 per hour, 24 hours, 365 days.
+BLOCKS_PER_YEAR = 52560
 # The cache time in seconds. 0 turns the cache off.
 CACHE_SECONDS = 60
 
@@ -36,6 +40,28 @@ def _fetch(url: str) -> bytes | None:
             return reply.read()
     except (urllib.error.URLError, TimeoutError, OSError):
         return None
+
+
+def _read_year_ago_difficulty(height: int) -> float | None:
+    """Return the network difficulty one year back, or None on a failure.
+
+    The difficulty holds steady for a whole epoch, so the block one year back
+    holds the value for that time. A missing block gives None.
+    """
+    target = height - BLOCKS_PER_YEAR
+    if target < 0:
+        return None
+    body = _fetch(BLOCKS_URL.format(height=target))
+    if body is None:
+        return None
+    try:
+        blocks = json.loads(body)
+        value = float(blocks[0]["difficulty"])
+    except (json.JSONDecodeError, KeyError, IndexError, TypeError, ValueError):
+        return None
+    if value <= 0:
+        return None
+    return value
 
 
 def _read_network() -> tuple[int, object]:
@@ -60,9 +86,16 @@ def _read_network() -> tuple[int, object]:
     except (json.JSONDecodeError, KeyError, TypeError, ValueError):
         return 502, {"error": "bad stats reply"}
 
+    year_ago = _read_year_ago_difficulty(height)
+    change = None
+    if year_ago is not None:
+        change = (difficulty - year_ago) / year_ago * 100.0
+
     return 200, {
         "height": height,
         "difficulty": difficulty,
+        "difficultyYearAgo": year_ago,
+        "difficultyChange": change,
         "hashrate": hashrate,
     }
 

@@ -29,10 +29,11 @@
   const ADDRESS_PATTERN =
     /^(bc1[a-z0-9]{25,89}|[13][a-km-zA-HJ-NP-Z1-9]{25,34})$/;
 
-  /** The four miner rows that the lookup fills. */
+  /** The five miner rows that the lookup fills. */
   const MINER_FIELDS = [
     "#miner-hashrate",
     "#miner-workers",
+    "#miner-shares",
     "#miner-bestever",
     "#miner-authorised",
   ];
@@ -139,7 +140,7 @@
   };
 
   /**
-   * Write the four miner rows from a pool reply.
+   * Write the five miner rows from a pool reply.
    * @param {Record<string, unknown>} data - The pool reply.
    * @returns {void}
    */
@@ -156,6 +157,7 @@
     }
 
     ns.setField("#miner-workers", ns.formatCount(data.workers));
+    ns.setField("#miner-shares", formatShare(data.shares));
     ns.setField("#miner-bestever", formatShare(data.bestever));
     ns.setField("#miner-authorised", formatTime(data.authorised));
   };

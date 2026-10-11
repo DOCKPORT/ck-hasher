@@ -75,7 +75,7 @@
 
       const marker = document.createElement("span");
       marker.className = `price-change price-change--${direction.name}`;
-      marker.textContent = `${direction.symbol} ${Math.abs(change).toFixed(2)}%`;
+      marker.textContent = `${direction.symbol} ${Math.abs(change).toFixed(2)}% 24h`;
 
       slot.append(document.createTextNode(" "));
       slot.append(marker);
