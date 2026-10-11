@@ -13,6 +13,7 @@
  * @property {() => void} [initAddressSearch] - Wire the address search form.
  * @property {() => void} [initPriceFeed] - Open the live BTC price feed.
  * @property {(hashrate: unknown) => void} [setMinerHashrate] - Take the miner hash rate.
+ * @property {(value: unknown) => (string | undefined)} [formatHashrateValue]
  */
 
 (() => {
@@ -146,8 +147,8 @@
    */
   const fillMiner = (data) => {
     const hashrate =
-      typeof ns.formatHashrate === "function"
-        ? ns.formatHashrate(data.hashrate1m)
+      typeof ns.formatHashrateValue === "function"
+        ? ns.formatHashrateValue(ns.parseHashrate(data.hashrate1m))
         : undefined;
     ns.setField("#miner-hashrate", hashrate);
 

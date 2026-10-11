@@ -20,8 +20,8 @@
  * @property {(value: unknown) => string} [formatUsd] - Format a dollar value.
  * @property {(url: string, label: string,
  *   fill: (data: Record<string, unknown>) => void) => void} [loadJson] - Read one JSON feed.
- * @property {(value: unknown) => (string | undefined)} [formatHashrate]
  * @property {(value: unknown) => (number | undefined)} [parseHashrate]
+ * @property {(value: unknown) => (string | undefined)} [formatHashrateValue]
  */
 
 (() => {
@@ -105,6 +105,8 @@
     t: 1e12,
     p: 1e15,
     e: 1e18,
+    z: 1e21,
+    y: 1e24,
   };
 
   /**
@@ -143,22 +145,6 @@
   };
 
   /**
-   * Normalize a ckpool hashrate string. The source uses a short form, for
-   * example "958G" for 958 gigahash per second. The result reads "958 GH/s".
-   * A value with no unit takes the plain "H/s". A bad value or an unknown unit
-   * gives undefined, so the readout and the odds feature agree.
-   * @param {unknown} raw - The raw value.
-   * @returns {string | undefined} The text, or undefined on a bad value.
-   */
-  ns.formatHashrate = (raw) => {
-    const parts = readHashrate(raw);
-    if (parts === null || hashStep(parts.prefix) === undefined) {
-      return undefined;
-    }
-    return `${parts.text} ${parts.prefix}H/s`;
-  };
-
-  /**
    * Read a ckpool hashrate string as a number of hashes per second. For example
    * "958G" becomes 958000000000, and "1.01T" becomes 1010000000000. A value
    * with no unit stays as it is. A bad value gives undefined.
@@ -175,5 +161,47 @@
       return undefined;
     }
     return parts.value * step;
+  };
+
+  /**
+   * The hash rate units, largest first. The value reads as a number plus one of
+   * these labels, for example "1,011.66 EH/s".
+   * @type {Array<[number, string]>}
+   */
+  const HASHRATE_UNITS = [
+    [1e24, "YH/s"],
+    [1e21, "ZH/s"],
+    [1e18, "EH/s"],
+    [1e15, "PH/s"],
+    [1e12, "TH/s"],
+    [1e9, "GH/s"],
+    [1e6, "MH/s"],
+    [1e3, "kH/s"],
+  ];
+
+  /**
+   * Format a hash rate in hashes per second with the largest unit that fits.
+   * The value scales up on demand, so 1e21 reads "1 ZH/s" and not "1,000 EH/s".
+   * A value below one thousand takes the plain "H/s". A bad value or a value
+   * of zero or less gives undefined.
+   * @param {unknown} value - The raw value in hashes per second.
+   * @returns {string | undefined} The text, or undefined on a bad value.
+   */
+  ns.formatHashrateValue = (value) => {
+    const amount = Number(value);
+    if (!Number.isFinite(amount) || amount <= 0) {
+      return undefined;
+    }
+    for (const [step, unit] of HASHRATE_UNITS) {
+      if (amount >= step) {
+        const scaled = amount / step;
+        return `${scaled.toLocaleString("en-US", {
+          maximumFractionDigits: 2,
+        })} ${unit}`;
+      }
+    }
+    return `${amount.toLocaleString("en-US", {
+      maximumFractionDigits: 2,
+    })} H/s`;
   };
 })();

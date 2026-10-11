@@ -15,6 +15,7 @@
  * @property {() => void} [initPriceFeed] - Open the live BTC price feed.
  * @property {() => void} [initNetworkFeed] - Read the network data once.
  * @property {(difficulty: unknown) => void} [setNetworkDifficulty] - Take the difficulty.
+ * @property {(value: unknown) => (string | undefined)} [formatHashrateValue]
  */
 
 (() => {
@@ -24,8 +25,6 @@
   const page = window;
   const ns = page.CKHASHER || (page.CKHASHER = {});
 
-  /** One exahash in hashes per second. */
-  const HASH_PER_EH = 1e18;
   /** One trillion in plain units. */
   const UNIT_PER_T = 1e12;
 
@@ -103,7 +102,7 @@
       formatUnit(data.difficulty, UNIT_PER_T, "T"),
       data.difficultyChange,
     );
-    ns.setField("#network-hashrate", formatUnit(data.hashrate, HASH_PER_EH, "EH/s"));
+    ns.setField("#network-hashrate", ns.formatHashrateValue(data.hashrate));
 
     /* Hand the height to the subsidy module. */
     if (typeof ns.setBlockHeight === "function") {

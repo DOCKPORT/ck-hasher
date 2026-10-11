@@ -14,6 +14,7 @@
  * @property {() => void} [initPriceFeed] - Open the live BTC price feed.
  * @property {() => void} [initNetworkFeed] - Read the network data once.
  * @property {() => void} [initPoolFeed] - Read the pool hashrate once.
+ * @property {(value: unknown) => (string | undefined)} [formatHashrateValue]
  */
 
 (() => {
@@ -30,8 +31,8 @@
    */
   const fillPool = (data) => {
     const hashrate =
-      typeof ns.formatHashrate === "function"
-        ? ns.formatHashrate(data.hashrate)
+      typeof ns.formatHashrateValue === "function"
+        ? ns.formatHashrateValue(ns.parseHashrate(data.hashrate))
         : undefined;
     ns.setField("#ckpool-hashrate", hashrate);
   };
