@@ -1,8 +1,8 @@
 /**
  * @file The Bitcoin network data feed. On page load it reads the block height,
- * the network difficulty, the year-over-year difficulty change, and the network
- * hashrate from the pool proxy, and writes them into the Network data panel. A
- * failure leaves the empty marks.
+ * the network difficulty, the year-over-year difficulty change, the network
+ * hashrate, and the year-over-year hashrate change from the pool proxy, and
+ * writes them into the Network data panel. A failure leaves the empty marks.
  * The page has no build step, so this file adds one function to the shared
  * namespace from js/version.js. Load js/version.js before this file.
  */
@@ -62,15 +62,16 @@
   };
 
   /**
-   * Write the difficulty and, beside it, the year-over-year change. The change
-   * takes a direction color: green up, red down, grey flat. A missing change
-   * leaves the difficulty alone.
-   * @param {string | undefined} text - The difficulty text.
+   * Write a value and, beside it, the year-over-year change. The change takes a
+   * direction color: green up, red down, grey flat. A missing change leaves the
+   * value alone.
+   * @param {string} selector - The field selector.
+   * @param {string | undefined} text - The value text.
    * @param {unknown} change - The year-over-year change in percent.
    * @returns {void}
    */
-  const paintDifficulty = (text, change) => {
-    const slot = document.querySelector("#network-difficulty");
+  const paintChange = (selector, text, change) => {
+    const slot = document.querySelector(selector);
     if (!(slot instanceof HTMLElement)) {
       return;
     }
@@ -98,11 +99,16 @@
    */
   const fillNetwork = (data) => {
     ns.setField("#block-height", ns.formatCount(data.height));
-    paintDifficulty(
+    paintChange(
+      "#network-difficulty",
       formatUnit(data.difficulty, UNIT_PER_T, "T"),
       data.difficultyChange,
     );
-    ns.setField("#network-hashrate", ns.formatHashrateValue(data.hashrate));
+    paintChange(
+      "#network-hashrate",
+      ns.formatHashrateValue(data.hashrate),
+      data.hashrateChange,
+    );
 
     /* Hand the height to the subsidy module. */
     if (typeof ns.setBlockHeight === "function") {

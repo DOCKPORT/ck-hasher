@@ -18,7 +18,7 @@
   const ns = page.CKHASHER || (page.CKHASHER = {});
 
   /** The current release version. Bump this value and the git tag together. */
-  const VERSION = "v1.1.1";
+  const VERSION = "v1.2.0";
 
   ns.version = VERSION;
 })();

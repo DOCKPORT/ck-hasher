@@ -2,7 +2,8 @@
 
 Handle GET /api/network. Fetch the block height and the mining statistics from
 mempool.space, and return one small JSON with the height, the network
-difficulty, the year-over-year difficulty change, and the network hashrate.
+difficulty, the year-over-year difficulty change, the network hashrate, and the
+year-over-year hashrate change.
 Vercel runs this file as a function, one call per request. The local
 dev_server.py imports fetch_network from this file, so the core logic lives in
 one place.
@@ -20,7 +21,9 @@ from concurrent.futures import ThreadPoolExecutor
 from http.server import BaseHTTPRequestHandler
 
 HEIGHT_URL = "https://mempool.space/api/blocks/tip/height"
-STATS_URL = "https://mempool.space/api/v1/mining/hashrate/3d"
+# The one year hashrate reply holds one daily point, oldest first. It also
+# carries the current hashrate and the current difficulty.
+STATS_URL = "https://mempool.space/api/v1/mining/hashrate/1y"
 BLOCKS_URL = "https://mempool.space/api/blocks/{height}"
 TIMEOUT_SECONDS = 15
 # The blocks in one year at the 10 minute target: 6 per hour, 24 hours, 365 days.
@@ -64,6 +67,22 @@ def _read_year_ago_difficulty(height: int) -> float | None:
     return value
 
 
+def _read_year_ago_hashrate(stats: dict) -> float | None:
+    """Return the daily hashrate one year back, or None on a failure.
+
+    The one year reply lists one point per day, oldest first, so the first
+    point holds the value one year back. A missing or bad list gives None.
+    """
+    try:
+        points = stats["hashrates"]
+        value = float(points[0]["avgHashrate"])
+    except (KeyError, IndexError, TypeError, ValueError):
+        return None
+    if value <= 0:
+        return None
+    return value
+
+
 def _read_network() -> tuple[int, object]:
     """Fetch and shape the network data from mempool.space."""
     with ThreadPoolExecutor(max_workers=2) as pool:
@@ -87,16 +106,23 @@ def _read_network() -> tuple[int, object]:
         return 502, {"error": "bad stats reply"}
 
     year_ago = _read_year_ago_difficulty(height)
-    change = None
+    difficulty_change = None
     if year_ago is not None:
-        change = (difficulty - year_ago) / year_ago * 100.0
+        difficulty_change = (difficulty - year_ago) / year_ago * 100.0
+
+    year_ago_hashrate = _read_year_ago_hashrate(stats)
+    hashrate_change = None
+    if year_ago_hashrate is not None:
+        hashrate_change = (hashrate - year_ago_hashrate) / year_ago_hashrate * 100.0
 
     return 200, {
         "height": height,
         "difficulty": difficulty,
         "difficultyYearAgo": year_ago,
-        "difficultyChange": change,
+        "difficultyChange": difficulty_change,
         "hashrate": hashrate,
+        "hashrateYearAgo": year_ago_hashrate,
+        "hashrateChange": hashrate_change,
     }
 
 

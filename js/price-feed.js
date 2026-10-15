@@ -1,8 +1,10 @@
 /**
  * @file The live BTC price feed. It opens a WebSocket to Coinbase and writes
- * the price and the 24 hour change into the BTC price slot. The feed is public,
- * so no key and no backend take part. The slot updates at most once a second.
- * A dropped socket reconnects with a growing delay.
+ * the price and the year-over-year change into the BTC price slot. It reads the
+ * daily close of the day one year back from the Coinbase candles REST API for
+ * the base of the change. The feeds are public, so no key and no backend take
+ * part. The slot updates at most once a second. A dropped socket reconnects
+ * with a growing delay.
  * The page has no build step, so this file adds one function to the shared
  * namespace from js/version.js. Load js/version.js before this file.
  */
@@ -26,6 +28,15 @@
   const ENDPOINT = "wss://ws-feed.exchange.coinbase.com";
   /** The product pair. */
   const PRODUCT = "BTC-USD";
+  /** The public Coinbase Exchange daily candles REST endpoint. No key is needed. */
+  const CANDLES_URL =
+    "https://api.exchange.coinbase.com/products/BTC-USD/candles";
+  /** The seconds in one day. This is the daily candle step. */
+  const DAY_SECONDS = 86400;
+  /** The milliseconds in one day. */
+  const DAY_MS = 86400000;
+  /** The closed price field in a candle row. */
+  const CANDLE_CLOSE = 4;
   /** The largest wait between two reconnect tries. */
   const MAX_BACKOFF_MS = 30000;
   /** The shortest time between two screen updates. */
@@ -57,25 +68,81 @@
   };
 
   /**
-   * Draw one ticker update into the slot. The price leads. The 24 hour change
-   * follows it, when the feed carries the open price.
-   * @param {HTMLElement} slot - The BTC price slot.
-   * @param {{ price: string, open24h?: number }} info - The ticker values.
+   * Read the daily candle start, in epoch seconds, for the same day one year
+   * back. The value uses UTC midnight. In a common year, 29 February rolls to
+   * 1 March.
+   * @returns {number} The epoch seconds of the day one year back.
+   */
+  const yearAgoDay = () => {
+    const now = new Date();
+    const midnight = Date.UTC(
+      now.getUTCFullYear() - 1,
+      now.getUTCMonth(),
+      now.getUTCDate(),
+    );
+    return Math.floor(midnight / 1000);
+  };
+
+  /**
+   * Read the daily close of the day one year back from Coinbase. A success hands
+   * the close to the callback. A failure is logged, and the callback does not
+   * run.
+   * @param {(close: number) => void} onClose - The close handler.
    * @returns {void}
    */
-  const paint = (slot, info) => {
+  const loadYearAgoClose = (onClose) => {
+    const day = yearAgoDay();
+    const start = encodeURIComponent(new Date(day * 1000).toISOString());
+    const end = encodeURIComponent(new Date(day * 1000 + DAY_MS).toISOString());
+    const url = `${CANDLES_URL}?granularity=${DAY_SECONDS}&start=${start}&end=${end}`;
+
+    fetch(url)
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error(String(response.status));
+        }
+        return response.json();
+      })
+      .then((rows) => {
+        if (!Array.isArray(rows)) {
+          return;
+        }
+        const row = rows.find(
+          (item) => Array.isArray(item) && Number(item[0]) === day,
+        );
+        if (!row) {
+          return;
+        }
+        const close = toNumber(row[CANDLE_CLOSE]);
+        if (close !== undefined && close > 0) {
+          onClose(close);
+        }
+      })
+      .catch((error) => {
+        console.error("ck-hasher: the year-ago price did not load", error);
+      });
+  };
+
+  /**
+   * Draw one ticker update into the slot. The price leads. The year-over-year
+   * change follows it, when the year-ago close is at hand.
+   * @param {HTMLElement} slot - The BTC price slot.
+   * @param {{ price: string }} info - The ticker values.
+   * @param {number | null} reference - The daily close one year back.
+   * @returns {void}
+   */
+  const paint = (slot, info, reference) => {
     slot.textContent = "";
     slot.append(document.createTextNode(ns.formatUsd(info.price)));
 
     const price = toNumber(info.price);
-    const open = info.open24h;
-    if (price !== undefined && open !== undefined && open !== 0) {
-      const change = ((price - open) / open) * 100;
+    if (price !== undefined && reference !== null) {
+      const change = ((price - reference) / reference) * 100;
       const direction = readDirection(change);
 
       const marker = document.createElement("span");
       marker.className = `price-change price-change--${direction.name}`;
-      marker.textContent = `${direction.symbol} ${Math.abs(change).toFixed(2)}% 24h`;
+      marker.textContent = `${direction.symbol} ${Math.abs(change).toFixed(2)}% YoY`;
 
       slot.append(document.createTextNode(" "));
       slot.append(marker);
@@ -101,6 +168,8 @@
 
     /** The number of failed tries since the last success. */
     let attempt = 0;
+    /** The daily close one year back. Null until the REST reply lands. */
+    let yearAgo = null;
     /** The latest ticker values. A new object marks a fresh value. */
     let latest = null;
     /** The ticker values on the screen. */
@@ -112,7 +181,7 @@
       if (latest === null) {
         return;
       }
-      paint(slot, latest);
+      paint(slot, latest, yearAgo);
       shown = latest;
     };
 
@@ -158,7 +227,7 @@
         if (!data || data.type !== "ticker" || data.product_id !== PRODUCT) {
           return;
         }
-        latest = { price: data.price, open24h: toNumber(data.open_24h) };
+        latest = { price: data.price };
         schedule();
       });
 
@@ -172,6 +241,12 @@
         socket.close();
       });
     };
+
+    /* Read the year-ago close once. A later paint picks the value up. */
+    loadYearAgoClose((close) => {
+      yearAgo = close;
+      render();
+    });
 
     connect();
   };
