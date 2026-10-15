@@ -33,8 +33,6 @@
     "https://api.exchange.coinbase.com/products/BTC-USD/candles";
   /** The seconds in one day. This is the daily candle step. */
   const DAY_SECONDS = 86400;
-  /** The milliseconds in one day. */
-  const DAY_MS = 86400000;
   /** The closed price field in a candle row. */
   const CANDLE_CLOSE = 4;
   /** The largest wait between two reconnect tries. */
@@ -92,9 +90,8 @@
    */
   const loadYearAgoClose = (onClose) => {
     const day = yearAgoDay();
-    const start = encodeURIComponent(new Date(day * 1000).toISOString());
-    const end = encodeURIComponent(new Date(day * 1000 + DAY_MS).toISOString());
-    const url = `${CANDLES_URL}?granularity=${DAY_SECONDS}&start=${start}&end=${end}`;
+    const stamp = encodeURIComponent(new Date(day * 1000).toISOString());
+    const url = `${CANDLES_URL}?granularity=${DAY_SECONDS}&start=${stamp}&end=${stamp}`;
 
     fetch(url)
       .then((response) => {
