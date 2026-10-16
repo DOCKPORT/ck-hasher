@@ -28,6 +28,11 @@ BLOCKS_URL = "https://mempool.space/api/blocks/{height}"
 TIMEOUT_SECONDS = 15
 # The blocks in one year at the 10 minute target: 6 per hour, 24 hours, 365 days.
 BLOCKS_PER_YEAR = 52560
+# The seconds in one year. The hashrate base date sits this far back.
+YEAR_SECONDS = 365 * 86400
+# The days in the hashrate average. The current hashrate from Core covers 1008
+# blocks, about one week, so the year-ago base takes the same length.
+HASH_WINDOW_DAYS = 7
 # The cache time in seconds. 0 turns the cache off.
 CACHE_SECONDS = 60
 
@@ -68,19 +73,52 @@ def _read_year_ago_difficulty(height: int) -> float | None:
 
 
 def _read_year_ago_hashrate(stats: dict) -> float | None:
-    """Return the daily hashrate one year back, or None on a failure.
+    """Return the mean daily hashrate one year back, or None on a failure.
 
-    The one year reply lists one point per day, oldest first, so the first
-    point holds the value one year back. A missing or bad list gives None.
+    The reply lists one daily point per day, oldest first. The window edge moves
+    as time passes, so the base takes the day nearest the year-ago date, not the
+    first point. The value is the mean of a short window around that day. The
+    window matches the current hashrate, which covers about one week. An empty or
+    bad list gives None.
     """
     try:
         points = stats["hashrates"]
-        value = float(points[0]["avgHashrate"])
+        last = float(points[-1]["timestamp"])
     except (KeyError, IndexError, TypeError, ValueError):
         return None
-    if value <= 0:
+
+    target = last - YEAR_SECONDS
+    anchor = None
+    closest = None
+    for index, point in enumerate(points):
+        try:
+            stamp = float(point["timestamp"])
+        except (KeyError, TypeError, ValueError):
+            continue
+        distance = abs(stamp - target)
+        if closest is None or distance < closest:
+            closest = distance
+            anchor = index
+    if anchor is None:
         return None
-    return value
+
+    span = min(HASH_WINDOW_DAYS, len(points))
+    low = max(0, min(anchor - span // 2, len(points) - span))
+    window = points[low : low + span]
+
+    total = 0.0
+    count = 0
+    for point in window:
+        try:
+            value = float(point["avgHashrate"])
+        except (KeyError, TypeError, ValueError):
+            continue
+        if value > 0:
+            total += value
+            count += 1
+    if count == 0:
+        return None
+    return total / count
 
 
 def _read_network() -> tuple[int, object]:
